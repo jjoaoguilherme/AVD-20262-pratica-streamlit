@@ -1,173 +1,100 @@
-import altair as alt
+from pathlib import Path
+
 import pandas as pd
 import streamlit as st
 
-from src.data_loader import load_data
+st.set_page_config(page_title="Medidas dos pinguins", page_icon="🐧", layout="wide")
 
-st.set_page_config(
-    page_title="Avaliação de Correlação entre Variáveis Quantitativas do Heart Disease Dataset",
-    layout="wide",
-)
+MEDIDAS = {
+    "bill_length_mm": "Comprimento do bico (mm)",
+    "bill_depth_mm": "Profundidade do bico (mm)",
+    "flipper_length_mm": "Comprimento da nadadeira (mm)",
+    "body_mass_g": "Massa corporal (g)",
+}
+ESPECIES = {"Adelie": "Adélie", "Chinstrap": "Chinstrap", "Gentoo": "Gentoo"}
 
-st.title("Avaliação de Correlação entre Variáveis Quantitativas do Heart Disease Dataset")
 
-df = load_data()
+@st.cache_data
+def carregar_dados():
+    caminho = Path(__file__).resolve().parent / "data" / "clean" / "penguins.csv"
+    return pd.read_csv(caminho)
 
-# Variáveis quantitativas do estudo (mesma lista VARS_QUANT do notebook de EDA)
-VARS_QUANT = ["age", "trestbps", "chol", "thalach", "oldpeak"]
 
-# Sidebar: filtros (variáveis + intervalo)
-with st.sidebar:
-    st.header("Filtros")
+st.title("As medidas dos pinguins")
+st.caption("Arquipélago Palmer, 2007–2009 · Correlação e distribuição das medidas físicas")
 
+try:
+    df = carregar_dados()
+except (FileNotFoundError, pd.errors.EmptyDataError):
+    st.error("Não foi possível abrir a base tratada. Execute o notebook da EDA para gerá-la.")
+    st.stop()
+
+if df.empty or not (set(MEDIDAS) | {"species"}).issubset(df.columns):
+    st.error("A base tratada está vazia ou não contém as colunas esperadas.")
+    st.stop()
+
+st.subheader("Selecione seu recorte")
+st.caption("Os filtros de espécie e massa se aplicam às duas análises.")
+filtro_especie, filtro_medidas, filtro_massa = st.columns([1, 1.3, 1.2])
+
+with filtro_especie:
+    opcoes_especies = sorted(df["species"].dropna().unique().tolist())
+    especies = st.multiselect(
+        "Espécies", opcoes_especies, default=opcoes_especies,
+        format_func=lambda especie: ESPECIES.get(especie, especie), key="especies",
+    )
+
+with filtro_medidas:
     variaveis = st.multiselect(
-        "Variáveis Quantitativas",
-        options=VARS_QUANT,
-        default=VARS_QUANT,
-        help="Selecione as variáveis quantitativas que deseja analisar no dashboard.",
+        "Medidas para correlação", list(MEDIDAS), default=list(MEDIDAS),
+        format_func=MEDIDAS.get, key="variaveis",
     )
 
-    separar_por_classe = st.toggle(
-        "Distinguir por Classe",
-        value=False,
-        help="Colore a distribuição pela classe (doenca_cardiaca: Normal ou Cardíaco).",
+with filtro_massa:
+    massa_min, massa_max = int(df["body_mass_g"].min()), int(df["body_mass_g"].max())
+    intervalo_massa = st.slider(
+        "Intervalo da massa corporal (g)", min_value=massa_min, max_value=massa_max,
+        value=(massa_min, massa_max), step=1, key="intervalo_massa",
     )
 
-    # Um slider de intervalo para cada variável selecionada
-    intervalos = {}
-    for var in variaveis:
-        if pd.api.types.is_integer_dtype(df[var]):
-            minimo, maximo, passo = int(df[var].min()), int(df[var].max()), 1
-        else:
-            minimo, maximo, passo = float(df[var].min()), float(df[var].max()), 0.1
-        intervalos[var] = st.slider(
-            f"Intervalo de {var}",
-            min_value=minimo,
-            max_value=maximo,
-            value=(minimo, maximo),
-            step=passo,
-            key=f"intervalo_{var}",
-        )
+df_filtrado = df.loc[
+    df["species"].isin(especies) & df["body_mass_g"].between(*intervalo_massa)
+]
+st.caption(f"Exibindo {len(df_filtrado)} de {len(df)} registros após os filtros.")
+if df_filtrado.empty:
+    st.warning("Nenhum registro corresponde aos filtros. Selecione espécies ou amplie o intervalo.")
 
-# Mantém só os pacientes dentro de todos os intervalos escolhidos
-df_filtrado = df
-for var, (inicio, fim) in intervalos.items():
-    df_filtrado = df_filtrado[df_filtrado[var].between(inicio, fim)]
-
-st.caption(f"{len(df_filtrado)} de {len(df)} pacientes dentro dos intervalos escolhidos.")
-
-# Dashboard 1: correlação (heatmap) à esquerda, distribuição (histograma) à direita
-col_correlacao, col_distribuicao = st.columns([1, 1.5])
-
-# Cores do histograma, em tons de sangue: vermelho arterial para Cardíaco, rosa claro para Normal
-COR_NORMAL = "#f4a6a6"
-COR_CARDIACO = "#c1121f"
-COR_HISTOGRAMA = COR_CARDIACO
-CORES_CLASSE = alt.Scale(domain=["Normal", "Cardíaco"], range=[COR_NORMAL, COR_CARDIACO])
-
-# Legenda das classes em texto, para caber no espaço livre da grade de histogramas
-LEGENDA_CLASSE = (
-    f"**Classe**  \n"
-    f":color[■]{{foreground=\"{COR_NORMAL}\"}} Normal  \n"
-    f":color[■]{{foreground=\"{COR_CARDIACO}\"}} Cardíaco"
-)
-
-with col_correlacao:
-    st.subheader("Correlação (Spearman)")
-
+st.divider()
+st.header("01 · Quais medidas variam juntas?")
+st.caption("Correlação de Pearson entre as medidas selecionadas")
+correlacao, contexto = st.columns([2, 1])
+with correlacao:
     if len(variaveis) < 2:
-        st.warning("Selecione pelo menos 2 variáveis para calcular a correlação.")
-    elif len(df_filtrado) < 30:
-        st.warning("Poucos pacientes nos intervalos escolhidos para calcular a correlação.")
-    else:
-        # Matriz de correlação de Spearman das variáveis selecionadas, em formato longo (uma linha por célula)
-        corr = (
-            df_filtrado[variaveis]
-            .corr(method="spearman")
-            .rename_axis(index="var_y", columns="var_x")
-            .stack()
-            .rename("correlacao")
-            .reset_index()
-        )
-        # Só o triângulo inferior, sem a diagonal (sempre 1): a matriz é simétrica, o resto é repetição
-        ordem = {var: i for i, var in enumerate(variaveis)}
-        corr = corr[corr["var_y"].map(ordem) > corr["var_x"].map(ordem)]
+        st.warning("Selecione pelo menos duas medidas para analisar a correlação.")
+    elif not df_filtrado.empty and len(df_filtrado) < 3:
+        st.warning("Amplie os filtros para incluir pelo menos três registros.")
+    elif not df_filtrado.empty and (df_filtrado[variaveis].nunique(dropna=True) < 2).any():
+        st.warning("Uma das medidas selecionadas não varia nesses registros. Ajuste os filtros.")
+    st.info("Espaço reservado para o mapa de calor da correlação.")
 
-        base = alt.Chart(corr).encode(
-            x=alt.X(
-                "var_x:N",
-                title=None,
-                sort=variaveis[:-1],  # a última variável só aparece nas linhas
-                axis=alt.Axis(labelAngle=0, labelFontSize=14),
-            ),
-            y=alt.Y("var_y:N", title=None, sort=variaveis[1:], axis=alt.Axis(labelFontSize=14)),  # a primeira só nas colunas
-        )
-        heatmap = base.mark_rect().encode(
-            color=alt.Color(
-                "correlacao:Q",
-                title="Spearman",
-                scale=alt.Scale(scheme="redblue", domain=[-1, 1], reverse=True),
-                legend=alt.Legend(titleFontSize=14, labelFontSize=13),
-            ),
-            tooltip=["var_x", "var_y", alt.Tooltip("correlacao:Q", format=".2f")],
-        )
-        valores = base.mark_text(fontSize=16).encode(
-            text=alt.Text("correlacao:Q", format=".2f"),
-            color=alt.condition(
-                "abs(datum.correlacao) > 0.5", alt.value("white"), alt.value("black")
-            ),
-        )
+with contexto:
+    st.subheader("Nadadeira e massa")
+    st.write("Na EDA, essas medidas apresentaram uma relação positiva. Compare as espécies usando os filtros.")
+    st.caption("A observação se refere à EDA; o gráfico dos dados filtrados será feito na próxima aula.")
 
-        st.altair_chart(
-            (heatmap + valores).properties(height=380),
-            width="stretch",
-            alt="Mapa de calor (triângulo inferior, sem a diagonal) da correlação de Spearman entre as variáveis quantitativas selecionadas",
-        )
+st.divider()
+st.header("02 · Como os valores se distribuem?")
+st.caption("Observe uma medida e compare as espécies.")
+controle_medida, controle_grupos = st.columns([2, 1])
+with controle_medida:
+    medida_distribuicao = st.selectbox(
+        "Medida para distribuição", list(MEDIDAS),
+        index=list(MEDIDAS).index("body_mass_g"), format_func=MEDIDAS.get,
+        key="medida_distribuicao",
+    )
+with controle_grupos:
+    separar_especies = st.toggle("Distinguir por espécie", key="separar_especies")
 
-with col_distribuicao:
-    st.subheader("Distribuição")
+st.info("Espaço reservado para o histograma da medida selecionada.")
 
-    if not variaveis:
-        st.warning("Selecione pelo menos 1 variável para ver a distribuição.")
-    elif df_filtrado.empty:
-        st.warning("Nenhum paciente dentro dos intervalos escolhidos.")
-    else:
-        # Com número par de variáveis não sobra espaço na grade: a legenda vai acima dela
-        if separar_por_classe and len(variaveis) % 2 == 0:
-            st.markdown(LEGENDA_CLASSE)
-
-        # Um histograma por variável selecionada, em grade de 2 colunas (cada um com a sua escala)
-        for inicio in range(0, len(variaveis), 2):
-            colunas = st.columns(2)
-            for coluna, var in zip(colunas, variaveis[inicio : inicio + 2]):
-                histograma = (
-                    alt.Chart(df_filtrado[[var, "doenca_cardiaca"]])
-                    .mark_bar()
-                    .encode(
-                        x=alt.X(f"{var}:Q", bin=alt.Bin(maxbins=20), title=var),
-                        y=alt.Y("count()", title="Pacientes"),
-                        tooltip=[alt.Tooltip("count()", title="Pacientes")],
-                    )
-                    .properties(height=200)
-                )
-                if separar_por_classe:
-                    histograma = histograma.encode(
-                        color=alt.Color(
-                            "doenca_cardiaca:N",
-                            title="Classe",
-                            scale=CORES_CLASSE,
-                            legend=None,
-                        ),
-                        tooltip=["doenca_cardiaca", alt.Tooltip("count()", title="Pacientes")],
-                    )
-                else:
-                    histograma = histograma.mark_bar(color=COR_HISTOGRAMA)
-
-                with coluna:
-                    st.altair_chart(histograma, width="stretch", alt=f"Histograma da variável {var}")
-
-            # Número ímpar de variáveis: a legenda ocupa o espaço que sobrou na última linha
-            if separar_por_classe and len(colunas) == 2 and len(variaveis[inicio : inicio + 2]) == 1:
-                colunas[1].markdown(LEGENDA_CLASSE)
-
-# TODO: Dashboard 2 — KPIs (Aula 22)
+# O mapa de calor e o histograma serão implementados na próxima aula.
