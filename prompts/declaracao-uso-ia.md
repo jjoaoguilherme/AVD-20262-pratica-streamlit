@@ -1,4 +1,4 @@
-# Declaração de uso de IA — Aulas 21 e 22
+<img width="1274" height="445" alt="image" src="https://github.com/user-attachments/assets/34fbbf5a-29c3-4be9-bc4b-e6929ba4b405" /># Declaração de uso de IA — Aulas 21 e 22
 
 **Nome:** João Guilherme Bezerra
 
@@ -10,11 +10,10 @@ ChatGPT/Codex.
 
 ## Uso na atividade
 
-A IA foi utilizada na escolha do dataset de pinguins, na criação dos rascunhos, na construção dos dashboards e na elaboração da justificativa das métricas do Dashboard 2.
+A IA foi utilizada na escolha do dataset de pinguins, na criação dos rascunhos, na construção dos dashboards e na elaboração de porque usar as metricas na construção do Dashboard 2.
 
-## Exemplo de solicitação
+##  solicitação
 
-O texto abaixo resume o tipo de ajuda solicitado; não é uma transcrição literal:
 
 > Com base no dataset Palmer Penguins e na análise exploratória realizada, ajude-me a planejar de três a cinco métricas para o Dashboard 2. Para cada métrica, explique qual variável será utilizada, o que ela mede, por que é relevante, para quem ela serve e qual decisão pode apoiar. Considere os filtros de espécie e ilha e as limitações da amostra.
 
