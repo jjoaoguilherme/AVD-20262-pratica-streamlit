@@ -10,7 +10,13 @@ ChatGPT/Codex.
 
 ## Uso na atividade
 
-A IA foi utilizada na escolha do dataset de pinguins, na criação dos rascunhos, e na construção dos dashboards.
+A IA foi utilizada na escolha do dataset de pinguins, na criação dos rascunhos, na construção dos dashboards e na elaboração da justificativa das métricas do Dashboard 2.
+
+## Exemplo de solicitação
+
+O texto abaixo resume o tipo de ajuda solicitado; não é uma transcrição literal:
+
+> Com base no dataset Palmer Penguins e na análise exploratória realizada, ajude-me a planejar de três a cinco métricas para o Dashboard 2. Para cada métrica, explique qual variável será utilizada, o que ela mede, por que é relevante, para quem ela serve e qual decisão pode apoiar. Considere os filtros de espécie e ilha e as limitações da amostra.
 
 ## O que foi aceito, modificado ou rejeitado
 
