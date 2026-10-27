@@ -1,4 +1,3 @@
-<img width="1274" height="445" alt="image" src="https://github.com/user-attachments/assets/34fbbf5a-29c3-4be9-bc4b-e6929ba4b405" /># Declaração de uso de IA — Aulas 21 e 22
 
 **Nome:** João Guilherme Bezerra
 
