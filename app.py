@@ -199,4 +199,26 @@ with aba_indicadores:
                 ).properties(height=230)
             )
             st.altair_chart(grafico_medias, key="d2_medias")
+    st.subheader("Nadadeira e massa corporal")
+    st.caption("Cada ponto representa um pinguim do recorte. Os filtros e a seleção da barra também se aplicam aqui.")
+    if selecionados.empty:
+        st.info("Sem dados para mostrar neste recorte.")
+    else:
+        grafico_dispersao = (
+            alt.Chart(selecionados).mark_circle(size=70, opacity=0.7)
+            .encode(
+                x=alt.X("flipper_length_mm:Q", title="Comprimento da nadadeira (mm)",
+                        scale=alt.Scale(zero=False)),
+                y=alt.Y("body_mass_g:Q", title="Massa corporal (g)",
+                        scale=alt.Scale(zero=False)),
+                color=alt.Color("especie_nome:N", title="Espécie",
+                                scale=alt.Scale(domain=list(CORES_ESPECIES), range=list(CORES_ESPECIES.values()))),
+                shape=alt.Shape("especie_nome:N", title="Espécie"),
+                tooltip=[alt.Tooltip("especie_nome:N", title="Espécie"),
+                         alt.Tooltip("island:N", title="Ilha"),
+                         alt.Tooltip("flipper_length_mm:Q", title="Nadadeira (mm)", format=".0f"),
+                         alt.Tooltip("body_mass_g:Q", title="Massa (g)", format=".0f")],
+            ).properties(height=350)
+        )
+        st.altair_chart(grafico_dispersao, key="d2_dispersao")
     st.caption("Amostra de 2007–2009. As espécies não aparecem igualmente em todas as ilhas; não atribua diferenças ao local isoladamente.")

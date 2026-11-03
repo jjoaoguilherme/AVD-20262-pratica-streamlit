@@ -1,11 +1,45 @@
-# AVD-20262-pratica-streamlit
+# Pinguins Palmer — Dashboards em Streamlit
 
-Repositório utilizado para aula prática relacionada a Streamlit na disciplina Análise e Visualização de Dados da Cesar School no período de 2026.2.
+Projeto desenvolvido para a disciplina de Análise e Visualização de Dados da CESAR School, utilizando o dataset Palmer Penguins, com registros de três espécies de pinguins coletados entre 2007 e 2009.
 
-Repositório-modelo das Aulas 21, 22 e 23: construção de dois dashboards em Streamlit a partir da EDA desenvolvida em sala. O deploy dos dashboards ocorrerá via Streamlit Community Cloud e serão os seguintes:
+A base tratada contém 342 registros. A análise explora as medidas físicas dos pinguins e as diferenças entre espécies e ilhas.
 
-- Dashboard 1 = correlação + distribuição das variáveis quantitativas
-- Dashboard 2 = KPIs
+## Dashboards
+
+### Dashboard 1 — Correlação e distribuição
+
+Permite selecionar medidas quantitativas, filtrar espécies e definir um intervalo de massa corporal. Apresenta um mapa de calor de correlação e um histograma, atualizados conforme os filtros.
+
+### Dashboard 2 — Indicadores
+
+Apresenta quatro métricas: quantidade de registros, massa corporal média, comprimento médio da nadadeira e percentual de Gentoo no recorte.
+
+Além dos indicadores, contém três gráficos:
+
+- Contagem de registros por espécie ou ilha.
+- Massa corporal média por espécie.
+- Dispersão entre comprimento da nadadeira e massa corporal.
+
+Os filtros de espécie e ilha controlam o dashboard. A seleção de uma barra também filtra os indicadores e os outros dois gráficos.
+
+## Tecnologias
+
+Python, Streamlit, Pandas, Plotly e Altair.
+
+## Arquivos principais
+
+- `app.py`: aplicação com os dois dashboards.
+- `src/analise_pinguins.py`: funções de filtro, métricas e correlação.
+- `data/clean/penguins.csv`: base tratada utilizada pelo app.
+- `notebooks/eda_penguins.ipynb`: análise exploratória dos pinguins.
+- `notebooks/metricas_penguins.ipynb`: planejamento e validação das métricas.
+- `entregas/`: rascunhos dos dashboards e justificativa das métricas.
+- `prompts/`: documentação do uso de IA.
+- `.streamlit/config.toml`: identidade visual da aplicação.
+
+## Aplicação publicada
+
+Link do app: a preencher após o deploy.
 
 ## Setup
 
@@ -54,7 +88,7 @@ streamlit run app.py
 ## Estrutura de dados: `data/raw` vs `data/clean`
 
 - `data/raw/`: o dataset **bruto**, como foi baixado. Nunca é editado à mão.
-- `data/clean/`: o dataset **já tratado**, exportado na última célula do notebook de EDA (ex.: `df.to_csv("data/clean/dataset.csv", index=False)`). O `app.py` lê **somente** desta pasta, via `src/data_loader.py`.
+- `data/clean/`: o dataset **já tratado**, exportado pelo notebook `notebooks/eda_penguins.ipynb`. O `app.py` lê diretamente o arquivo `data/clean/penguins.csv`.
 
 ### O que vai para o Git
 
@@ -73,8 +107,6 @@ streamlit run app.py
 ## Passo a passo
 
 O passo a passo detalhado de cada aula (Aulas 21, 22 e 23), com pré-requisitos e objetivos, está em [ROTEIRO.md](ROTEIRO.md). Comece por ele depois do Setup.
-
-**Link do app (Aula 23):** _(preencher após o deploy)_
 
 ## IA neste projeto
 
