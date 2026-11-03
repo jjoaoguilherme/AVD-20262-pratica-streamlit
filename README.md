@@ -39,7 +39,7 @@ Python, Streamlit, Pandas, Plotly e Altair.
 
 ## Aplicação publicada
 
-Link do app: a preencher após o deploy.
+Link do app: [Pinguins Palmer](https://pinguins-palmer-joao.streamlit.app/).
 
 ## Setup
 

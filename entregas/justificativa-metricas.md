@@ -2,7 +2,7 @@
 
 **Público-alvo:** estudantes, professores e pessoas que exploram a amostra de pinguins do Arquipélago Palmer. Os registros foram coletados entre 2007 e 2009. As métricas descrevem a base tratada e o recorte escolhido; não representam toda a população de pinguins.
 
-**Filtros:** espécie e ilha. O gráfico de barras pode agrupar por espécie ou por ilha. Clicar em uma barra restringe os quatro indicadores e o gráfico de massa média ao grupo escolhido; dar clique duplo limpa a seleção. Os dois filtros e a seleção devem ser considerados juntos. A contagem é sempre mostrada para indicar o tamanho do recorte.
+**Filtros:** espécie e ilha. O gráfico de barras pode agrupar por espécie ou por ilha. Clicar em uma barra restringe os quatro indicadores, o gráfico de massa média e o gráfico de dispersão ao grupo escolhido; dar clique duplo limpa a seleção. Os dois filtros e a seleção devem ser considerados juntos. A contagem é sempre mostrada para indicar o tamanho do recorte.
 
 ## 1. Registros selecionados
 
@@ -43,5 +43,7 @@
 ## Visualizações e limites
 
 O gráfico de barras mostra a contagem por espécie ou ilha. A segunda visualização compara a massa média por espécie e indica a quantidade de registros de cada grupo no tooltip. Ambos usam a mesma seleção; os indicadores usam o mesmo recorte. O mapa de calor e o histograma pertencem ao Dashboard 1.
+
+Adicionei o gráfico de dispersão entre comprimento da nadadeira e massa corporal para complementar as médias do dashboard. Cada ponto representa um pinguim, permitindo observar a variação dos valores e comparar as espécies. Assim, dá para ver diferenças que os indicadores de média não mostram. O gráfico acompanha os filtros e a seleção das barras, facilitando a análise de cada grupo.
 
 A amostra não representa toda a Antártida. As espécies não foram registradas igualmente em todas as ilhas: Chinstrap aparece apenas em Dream e Gentoo apenas em Biscoe. Por isso, diferenças entre ilhas não podem ser atribuídas à localização isoladamente. Os dois registros sem medidas físicas foram excluídos do conjunto tratado e nove registros têm sexo não informado.
